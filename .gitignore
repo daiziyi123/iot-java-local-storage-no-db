@@ -1,0 +1,20 @@
+# Maven
+target/
+*.jar
+*.class
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# 运行日志 & 本地数据
+*.log
+data/
+
+# OS
+.DS_Store
+Thumbs.db

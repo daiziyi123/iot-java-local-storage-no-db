@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  web:
+    resources:
+      # 前端文件优先从源码目录读取：改 HTML/JS/CSS 后浏览器刷新即生效，无需重启服务（避免重启掐断设备长连接）。
+      # 若源码目录不存在（JAR 部署到其他机器），自动回退到 JAR 内 classpath:/static/
+      static-locations: file:./src/main/resources/static/,classpath:/static/
+
+logging:
+  level:
+    com.example.iot: INFO
+
+iot:
+  tcp:
+    port: ${IOT_TCP_PORT:1025}
+  storage:
+    dir: ${IOT_STORAGE_DIR:./data}
+    max-sensor-records: ${IOT_MAX_SENSOR_RECORDS:5000}

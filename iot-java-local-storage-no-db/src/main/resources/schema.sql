@@ -1,0 +1,7 @@
+-- 当前版本不再使用 MySQL / 阿里云 RDS。
+-- 保留本文件仅用于说明：程序不会执行任何建库、建表或数据库访问操作。
+-- 数据默认持久化到 ./data 目录：
+--   projects.json
+--   sensor-records.jsonl
+--   alerts.json
+--   device-sessions.json

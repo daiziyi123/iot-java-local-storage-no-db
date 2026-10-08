@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧物联网多项目管理平台</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="side-brand">⌁</div>
+      <nav>
+        <button class="nav-item active" data-page="home"><span>⌂</span><b>首页</b></button>
+        <button class="nav-item" data-page="projects"><span>◇</span><b>项目管理</b></button>
+        <button class="nav-item" data-page="devices"><span>⬡</span><b>设备管理</b></button>
+        <button class="nav-item" data-page="monitor"><span>⌁</span><b>数据监控</b></button>
+        <button class="nav-item" data-page="alerts"><span>△</span><b>告警中心</b></button>
+        <button class="nav-item" data-page="storage"><span>▤</span><b>数据存储</b></button>
+      </nav>
+      <div class="side-runtime">
+        <span>系统状态</span>
+        <strong id="runtimeStatus">● 正常</strong>
+        <div class="mini-wave"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </aside>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <h1>智慧物联网多项目管理平台</h1>
+          <p>面向智慧校园与科研实验的物联网综合管理与数据分析平台</p>
+        </div>
+        <div class="top-stats">
+          <div class="top-stat"><span class="stat-icon">◷</span>
+            <div><small>当前时间</small><strong id="clock">--</strong></div>
+          </div>
+          <div class="top-stat"><span class="stat-icon">▣</span>
+            <div><small>项目总数</small><strong id="projectTotalTop">7</strong></div>
+          </div>
+          <div class="top-stat online-ring-stat">
+            <div class="top-ring" id="topOnlineRing">
+              <div><strong id="onlineCount">0/7</strong><small>在线</small></div>
+            </div>
+            <div><small>项目状态（核心指标）</small><strong id="onlineRateText">0% 在线率</strong></div>
+          </div>
+          <div class="top-stat"><span class="stat-icon cyan">⌁</span>
+            <div><small>数据流状态</small><strong id="streamStatus" class="success-text">检测中</strong></div>
+          </div>
+        </div>
+        <div class="system-status-box">
+          <span class="system-status-dot"></span>
+          <div><strong>SYSTEM ONLINE</strong><small>服务运行正常</small></div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section id="overviewPage">
+          <div class="section-heading">
+            <div><span class="eyebrow">PROJECT OVERVIEW</span>
+              <h2>项目概览</h2>
+            </div>
+            <button class="outline-btn" id="refreshAllBtn">↻ 刷新全部数据</button>
+          </div>
+          <div id="projectGrid" class="project-grid"></div>
+
+          <div class="overview-panels">
+            <article class="glass panel trend-panel">
+              <div class="panel-title">
+                <div><span>全局传感器数据趋势</span><small>最近本地记录</small></div><span class="live-dot">● LIVE</span>
+              </div>
+              <canvas id="overviewChart"></canvas>
+            </article>
+            <article class="glass panel status-panel">
+              <div class="panel-title">
+                <div><span>项目在线状态</span><small>TCP 设备连接情况</small></div>
+              </div>
+              <div class="donut-wrap">
+                <div id="onlineDonut" class="donut">
+                  <div><strong id="donutOnline">0</strong><small>在线项目</small></div>
+                </div>
+                <div class="status-legend">
+                  <p><i class="legend-dot on"></i>在线 <strong id="onlineLegend">0</strong></p>
+                  <p><i class="legend-dot off"></i>离线 <strong id="offlineLegend">7</strong></p>
+                </div>
+              </div>
+              <div class="online-bar"><span id="onlineBar"></span></div>
+            </article>
+          </div>
+
+          <div class="overview-bottom">
+            <article class="glass panel activity-panel">
+              <div class="panel-title">
+                <div><span>本地存储写入活动</span><small>最近采集记录</small></div><button class="text-btn"
+                  id="activityRefresh">刷新</button>
+              </div>
+              <div id="activityList" class="activity-list">
+                <div class="empty">暂无本地记录</div>
+              </div>
+            </article>
+            <article class="glass panel summary-panel">
+              <div class="panel-title">
+                <div><span>运行概览</span><small>当前平台状态</small></div>
+              </div>
+              <div class="summary-grid">
+                <div class="summary-card"><span>◈</span><small>接入项目</small><strong
+                    id="projectTotalSummary">7</strong><em>全部已配置</em></div>
+                <div class="summary-card"><span>⌁</span><small>在线项目</small><strong id="summaryOnline">0</strong><em>实时
+                    TCP 状态</em></div>
+                <div class="summary-card"><span>▤</span><small>最近记录</small><strong
+                    id="summaryRows">0</strong><em>当前加载窗口</em></div>
+                <div class="summary-card"><span>✓</span><small>数据存储</small><strong
+                    id="dbStatus">--</strong><em>本地文件持久化</em></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="detailPage" class="hidden">
+          <div class="breadcrumbs"><button id="backBtn">首页</button><span>/</span><span>项目管理</span><span>/</span><strong
+              id="crumbProject">--</strong></div>
+
+          <article class="glass project-hero">
+            <div id="heroVisual" class="hero-visual"><span id="heroIcon">◈</span>
+              <div class="scan-line"></div>
+            </div>
+            <div class="hero-main">
+              <div class="title-row">
+                <h2 id="projectTitle">--</h2><span id="onlineBadge" class="badge offline">离线</span>
+              </div>
+              <p id="projectDesc">--</p>
+              <div class="hero-meta">
+                <div><small>Project ID</small><strong id="heroPid">--</strong></div>
+                <div><small>数据来源</small><strong>本地文件</strong></div>
+                <div><small>通信链路</small><strong>TCP :1025</strong></div>
+                <div><small>最后更新</small><strong id="heroUpdated">--</strong></div>
+              </div>
+            </div>
+            <div class="hero-health">
+              <div class="health-ring"><span id="healthValue">--</span><small>连接状态</small></div>
+            </div>
+          </article>
+
+          <section class="metric-section">
+            <div class="panel-title slim">
+              <div><span>实时数据</span><small id="updateTime">最新采集时间：--</small></div>
+              <div class="title-actions"><button class="text-btn" id="collectNowBtn">⟳ 立即采集</button><span
+                  class="live-dot">● REAL TIME</span></div>
+            </div>
+            <div id="sensorFields" class="sensor-fields"></div>
+          </section>
+
+          <div class="detail-main-grid">
+            <article class="glass panel detail-trend">
+              <div class="panel-title">
+                <div><span>环境数据趋势</span><small>左轴：温度/湿度等 · 右轴：光照(lx) · 点击图例可隐藏</small></div>
+                <div class="chart-tools">
+                  <div class="range-select" id="rangeSelect"><button class="range-btn active" data-limit="20">近 20
+                      条</button><button class="range-btn" data-limit="50">近 50
+                      条</button><button class="range-btn" data-limit="100">近 100 条</button></div><button
+                    id="refreshHistoryBtn" class="text-btn">刷新</button>
+                </div>
+              </div>
+              <div id="chartLegend" class="chart-legend toggleable"></div>
+              <div class="chart-canvas-wrap"><canvas id="detailChart"></canvas>
+                <div id="chartEmpty" class="chart-empty">暂无趋势数据，设备上报后将自动绘制</div>
+              </div>
+            </article>
+            <article class="glass panel control-panel">
+              <div class="panel-title">
+                <div><span>设备控制</span><small>指令通过 TCP 长连接下发</small></div><span id="controlConnection"
+                  class="connection-chip">未连接</span>
+              </div>
+              <div id="commandButtons" class="command-buttons"></div>
+              <div class="custom-command">
+                <div><span class="cmd-icon">⌘</span>
+                  <div><strong>自定义指令</strong><small>请输入单字符命令</small></div>
+                </div>
+                <div class="custom-row"><input id="customCmd" maxlength="1" placeholder="A"><button
+                    id="sendCustomBtn">执行指令</button></div>
+              </div>
+              <div id="commandStatus" class="command-status">等待操作</div>
+            </article>
+          </div>
+
+          <div class="detail-bottom-grid">
+            <article class="glass panel history-card">
+              <div class="panel-title">
+                <div><span>本地最近记录</span><small>sensor-records.jsonl</small></div><span class="db-chip">● LOCAL
+                  STORAGE</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>时间</th>
+                      <th>字段</th>
+                      <th>数值</th>
+                      <th>状态</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historyBody"></tbody>
+                </table>
+              </div>
+            </article>
+            <article class="glass panel event-card">
+              <div class="panel-title">
+                <div><span>运行事件</span><small>由实时数据生成的状态提示</small></div>
+              </div>
+              <div id="eventList" class="event-list">
+                <div class="empty">等待实时数据</div>
+              </div>
+            </article>
+            <article class="glass panel device-card">
+              <div class="panel-title">
+                <div><span>设备在线状态</span><small>当前项目</small></div>
+              </div>
+              <div class="device-status-big"><strong id="deviceStateText">离线</strong><span id="deviceStatePct">0%</span>
+              </div>
+              <div class="online-bar"><span id="deviceOnlineBar"></span></div>
+              <div class="device-lines">
+                <p><i></i>Java REST API <b>正常</b></p>
+                <p><i></i>本地存储 <b id="mysqlDetailState">检测中</b></p>
+                <p><i></i>TCP 设备连接 <b id="tcpDetailState">离线</b></p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="projectsPage" class="hidden">
+          <div class="section-heading">
+            <div><span class="eyebrow">PROJECT MANAGEMENT</span>
+              <h2>项目管理</h2>
+            </div><button class="primary-btn" id="addProjectBtn">+ 新增项目</button>
+          </div>
+          <article class="glass panel">
+            <div class="panel-title">
+              <div><span>项目列表</span><small>点击行可编辑 / 删除</small></div><button class="text-btn" id="refreshProjectsBtn">↻
+                刷新</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>图标</th>
+                    <th>项目名</th>
+                    <th>主题色</th>
+                    <th>描述</th>
+                    <th>状态</th>
+                    <th>在线</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="projectsBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="devicesPage" class="hidden">
+          <div class="section-heading">
+            <div><span class="eyebrow">DEVICE MANAGEMENT</span>
+              <h2>设备管理</h2>
+            </div>
+          </div>
+          <div class="overview-panels device-summary">
+            <article class="glass panel mini-stat">
+              <div class="summary-card"><span>▣</span><small>会话总数</small><strong id="devTotal">0</strong></div>
+            </article>
+            <article class="glass panel mini-stat">
+              <div class="summary-card"><span>◉</span><small>在线设备</small><strong id="devOnline">0</strong></div>
+            </article>
+            <article class="glass panel mini-stat">
+              <div class="summary-card"><span>⌁</span><small>上报包数</small><strong id="devPackets">0</strong></div>
+            </article>
+            <article class="glass panel mini-stat">
+              <div class="summary-card"><span>✈</span><small>下发命令</small><strong id="devCmds">0</strong></div>
+            </article>
+          </div>
+          <article class="glass panel">
+            <div class="panel-title">
+              <div><span>会话列表</span><small>TCP 连接 / 断开</small></div>
+              <div class="filter-row"><button class="text-btn active" data-filter="all">全部</button><button
+                  class="text-btn" data-filter="online">仅在线</button><button class="text-btn" id="refreshDevicesBtn">↻
+                  刷新</button></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>会话ID</th>
+                    <th>项目</th>
+                    <th>远程地址</th>
+                    <th>连接时间</th>
+                    <th>包数</th>
+                    <th>字节</th>
+                    <th>命令数</th>
+                    <th>时长</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="devicesBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="monitorPage" class="hidden">
+          <div class="section-heading">
+            <div><span class="eyebrow">REAL-TIME MONITOR</span>
+              <h2>数据监控</h2>
+            </div>
+          </div>
+          <article class="glass panel">
+            <div class="panel-title">
+              <div><span>全局实时数据</span><small>所有在线项目实时传感器</small></div><button class="text-btn" id="monitorRefreshBtn">↻
+                刷新</button>
+            </div>
+            <div id="monitorGrid" class="sensor-fields"></div>
+          </article>
+          <div class="overview-panels">
+            <article class="glass panel trend-panel">
+              <div class="panel-title">
+                <div><span>多项目温度对比</span></div>
+              </div>
+              <canvas id="monitorChartTemp"></canvas>
+            </article>
+            <article class="glass panel trend-panel">
+              <div class="panel-title">
+                <div><span>多项目湿度对比</span></div>
+              </div>
+              <canvas id="monitorChartHum"></canvas>
+            </article>
+          </div>
+          <article class="glass panel">
+            <div class="panel-title">
+              <div><span>项目详情对比</span></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>项目ID</th>
+                    <th>项目名</th>
+                    <th>温度</th>
+                    <th>湿度</th>
+                    <th>光照</th>
+                    <th>其他指标</th>
+                    <th>状态</th>
+                    <th>更新时间</th>
+                  </tr>
+                </thead>
+                <tbody id="monitorCompareBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="alertsPage" class="hidden">
+          <div class="section-heading">
+            <div><span class="eyebrow">ALERT CENTER</span>
+              <h2>告警中心</h2>
+            </div>
+            <div class="filter-row"><button class="text-btn active" data-sev="all">全部</button><button class="text-btn"
+                data-sev="danger">🔴 严重</button><button class="text-btn" data-sev="warning">🟡 警告</button><button
+                class="text-btn" data-sev="info">🔵 信息</button><button class="text-btn"
+                id="alertsOnlyUnresolved">待处理优先</button><button class="text-btn"
+                id="resolveAllBtn">全部标记已处理</button><button class="text-btn" id="refreshAlertsBtn">↻ 刷新</button></div>
+          </div>
+          <div class="overview-panels device-summary">
+            <article class="glass panel mini-stat">
+              <div class="summary-card alert-danger"><span>🔴</span><small>严重</small><strong id="alertDanger">0</strong>
+              </div>
+            </article>
+            <article class="glass panel mini-stat">
+              <div class="summary-card alert-warning"><span>🟡</span><small>警告</small><strong
+                  id="alertWarning">0</strong></div>
+            </article>
+            <article class="glass panel mini-stat">
+              <div class="summary-card alert-info"><span>🔵</span><small>信息</small><strong id="alertInfo">0</strong>
+              </div>
+            </article>
+            <article class="glass panel mini-stat">
+              <div class="summary-card"><span>⏳</span><small>待处理</small><strong id="alertUnresolved">0</strong></div>
+            </article>
+          </div>
+          <article class="glass panel">
+            <div class="panel-title">
+              <div><span>告警列表</span></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>时间</th>
+                    <th>项目</th>
+                    <th>级别</th>
+                    <th>类型</th>
+                    <th>字段</th>
+                    <th>值</th>
+                    <th>阈值</th>
+                    <th>消息</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="alertsBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section id="storagePage" class="hidden">
+          <div class="section-heading">
+            <div><span class="eyebrow">DATA STORAGE</span>
+              <h2>数据存储</h2>
+            </div><button class="primary-btn" id="exportCsvBtn">⬇ 导出 CSV</button>
+          </div>
+          <article class="glass panel">
+            <div class="panel-title">
+              <div><span>传感器数据记录</span><small>sensor-records.jsonl 表</small></div>
+              <div class="filter-row"><select id="storagePidFilter">
+                  <option value="">全部项目</option>
+                </select><input id="storageKeyword" placeholder="关键字搜索 (字段/值)…"><button class="text-btn"
+                  id="refreshStorageBtn">↻ 刷新</button></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>时间</th>
+                    <th>项目ID</th>
+                    <th>项目名</th>
+                    <th>温度</th>
+                    <th>湿度</th>
+                    <th>光照</th>
+                    <th>其他字段</th>
+                  </tr>
+                </thead>
+                <tbody id="storageBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <div id="projectModal" class="modal hidden">
+          <div class="modal-content">
+            <div class="panel-title">
+              <div>
+                <h3 id="modalTitle">新增项目</h3>
+              </div><button class="text-btn" id="closeModalBtn">✕ 关闭</button>
+            </div>
+            <div class="form-grid">
+              <div><label>项目ID *</label><input id="m_id" type="number" placeholder="20"></div>
+              <div><label>项目名 *</label><input id="m_name" placeholder="智能教室"></div>
+              <div><label>图标</label><input id="m_icon" maxlength="2" placeholder="◈"></div>
+              <div><label>主题色</label><input id="m_accent" type="color" value="#2f7ad9"></div>
+              <div style="grid-column:span 2"><label>描述</label><input id="m_desc" placeholder="面向…的…"></div>
+              <div style="grid-column:span 2"><label>传感器字段 (逗号分隔，如：temperature,humidity,light)</label><input
+                  id="m_fields" placeholder="temperature,humidity,light"></div>
+              <div style="grid-column:span 2"><label>命令按钮 (格式：代码:名称，逗号分隔，如 A:LED开,E:LED关)</label><input id="m_commands"
+                  placeholder="A:LED红灯开启,E:LED关闭"></div>
+              <div><label>状态</label><select id="m_status">
+                  <option value="1">启用</option>
+                  <option value="0">禁用</option>
+                </select></div>
+            </div>
+            <div class="modal-footer"><button class="outline-btn" id="cancelModalBtn">取消</button><button
+                class="primary-btn" id="saveProjectBtn">保存</button></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="/app.js"></script>
+</body>
+
+</html>
