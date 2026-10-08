@@ -1,0 +1,69 @@
+# ========== 嵌入式构建产物（GD32F4xx + Keil / EIDE） ==========
+
+# 全工程临时目录
+Objects/
+Listings/
+build/
+
+# 链接脚本生成的中间文件
+*.lnp
+*.sct
+*.bak
+*.Bak
+
+# 编译中间件
+*.o
+*.d
+*.crf
+
+# 最终固件（可由源码重新编译生成，不入库）
+*.hex
+*.axf
+*.elf
+*.bin
+*.s19
+*.map
+*.htm
+
+# EIDE / Keil 工程缓存
+*.iex
+*.dep
+*.objlist
+*.params
+*.log
+*.lock
+ref.json
+unify_builder.log
+compiler.log
+builder.params
+objs.db
+objs.db.json
+.statistic.json
+
+# CMSIS / EIDE 自动生成
+Source/build/
+Source/.eide/
+Source/.clang-format
+Source/.gitignore
+Source/manifest.yml
+Source/cspell.config.yaml
+Source/.gitignore
+Source/History.txt
+Source/License.md
+Source/MISRA.md
+Source/Quick_Start_Guide.url
+
+# VS Code 本地配置（每个开发者的路径不一样，不入库）
+.vscode/
+
+# 打包文件（可由工程重新 zip）
+*.zip
+
+# Python 原型服务器的缓存
+__pycache__/
+*.pyc
+
+# 其他 IDE 本地锁文件
+*.uvguix.*
+*.uvoptx
+*.crf
