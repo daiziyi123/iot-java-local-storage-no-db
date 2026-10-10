@@ -1,4 +1,4 @@
-#define configCPU_CLOCK_HZ        ( 240000000UL ) // GD32F450主频
+#define configCPU_CLOCK_HZ        ( 200000000UL ) // GD32F470 200MHz PLL from 25MHz HXTAL
 #define configTICK_RATE_HZ        ( 1000 )        // 1ms系统滴答
 #define configMAX_PRIORITIES      ( 8 )
 #define configMINIMAL_STACK_SIZE  ( 128 )

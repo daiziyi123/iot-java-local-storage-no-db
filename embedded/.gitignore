@@ -53,6 +53,9 @@ Source/License.md
 Source/MISRA.md
 Source/Quick_Start_Guide.url
 
+# 本地工具链（每个开发者自己装，体积大）
+tools/
+
 # VS Code 本地配置（每个开发者的路径不一样，不入库）
 .vscode/
 
@@ -67,3 +70,4 @@ __pycache__/
 *.uvguix.*
 *.uvoptx
 *.crf
+tools/pylib/
