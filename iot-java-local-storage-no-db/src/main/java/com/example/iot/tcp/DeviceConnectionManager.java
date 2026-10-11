@@ -108,21 +108,4 @@ public class DeviceConnectionManager {
         out.write(cmd.getBytes(StandardCharsets.UTF_8));
         out.flush();
     }
-
-    /** [增强] 直接向指定 projectId 的 socket 写任意原始字节数据 */
-    public synchronized void sendRaw(int projectId, String raw) throws Exception {
-        Socket socket = sockets.get(projectId);
-        if (socket == null || socket.isClosed()) {
-            throw new IllegalStateException("Device not connected");
-        }
-        OutputStream out = socket.getOutputStream();
-        out.write(raw.getBytes(StandardCharsets.UTF_8));
-        out.flush();
-    }
-
-    /** 获取当前在线 socket 的远端地址，用于日志展示 */
-    public String getRemoteAddr(int projectId) {
-        Socket socket = sockets.get(projectId);
-        return socket == null ? null : String.valueOf(socket.getRemoteSocketAddress());
-    }
 }
