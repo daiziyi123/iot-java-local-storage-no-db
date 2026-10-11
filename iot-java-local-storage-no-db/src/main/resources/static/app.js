@@ -542,4 +542,58 @@ document.getElementById('refreshStorageBtn').onclick = renderStoragePage;
 document.getElementById('exportCsvBtn').onclick = () => { if (!storageCache.length) { toast('暂无数据可导出', 'warning'); return } const header = ['时间', '项目ID', '项目名', '温度', '湿度', '光照', '其他字段']; const lines = [header.join(',')]; storageCache.slice(0, 500).forEach(r => { const extras = Object.keys(r).filter(k => !['_p', 'project', 'name', 'timestamp', 'online', 'temperature', 'humidity', 'light', '_pid', '_name', 'id'].includes(k)).map(k => `${k}=${r[k] ?? ''}`).join(' | '); lines.push([r.timestamp, r._pid, r._name || r.name, r.temperature ?? '', r.humidity ?? '', r.light ?? '', extras].map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')) }); const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `sensor_export_${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(url); toast('CSV 已导出', 'success') };
 
 window.addEventListener('resize', () => { if (currentProject) drawDetailChart(currentHistory); else if (currentPage === 'monitor') {/* re-render optional */ } else loadOverviewActivity() });
-(async function initApp() { await loadProjects(); renderProjectCards(); await refreshOverview(); })(); setInterval(() => { if (currentPage === 'home' && !currentProject) refreshOverview() }, 10000);
+
+/* ===== [增强] TCP 通信日志实时轮询 ===== */
+let commLogPaused = false;
+let commLogHtmlCache = '';
+
+async function refreshCommLogs() {
+  const list = document.getElementById('commLogList');
+  if (!list || commLogPaused) return;
+  try {
+    const r = await fetch('/api/comm-logs?limit=50');
+    if (!r.ok) return;
+    const logs = await r.json();
+    if (!Array.isArray(logs) || logs.length === 0) {
+      list.innerHTML = '<div class="empty">等待 TCP 通信…</div>';
+      return;
+    }
+    const html = logs.map(l => {
+      const cls = l.direction === 'RECEIVED' ? 'received' : 'sent';
+      const dirLabel = l.direction === 'RECEIVED' ? '←' : '→';
+      return `<div class="comm-log-row ${cls}">
+        <span class="cl-time">${l.time}</span>
+        <span class="cl-dir">${dirLabel}</span>
+        <span class="cl-pid">#${l.projectId}</span>
+        <span class="cl-addr">${l.remoteAddr}</span>
+        <span class="cl-msg">${escapeHtml(l.content)}</span>
+      </div>`;
+    }).join('');
+    // 只有内容变化才重绘，避免闪烁
+    if (html !== commLogHtmlCache) {
+      commLogHtmlCache = html;
+      list.innerHTML = html;
+      list.scrollTop = 0; // 最新在顶
+    }
+  } catch { }
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+// 事件绑定
+document.getElementById('commLogPauseBtn')?.addEventListener('click', (e) => {
+  commLogPaused = !commLogPaused;
+  e.target.textContent = commLogPaused ? '▶ 继续' : '⏸ 暂停';
+  const dot = document.getElementById('commLogLiveDot');
+  if (dot) dot.classList.toggle('paused', commLogPaused);
+  if (!commLogPaused) refreshCommLogs();
+});
+document.getElementById('commLogClearBtn')?.addEventListener('click', async () => {
+  await fetch('/api/comm-logs/clear');
+  document.getElementById('commLogList').innerHTML = '<div class="empty">已清空，等待新通信…</div>';
+  commLogHtmlCache = '';
+});
+// 每 2 秒轮询一次通信日志
+setInterval(refreshCommLogs, 2000);
+
+(async function initApp() { await loadProjects(); renderProjectCards(); await refreshOverview(); refreshCommLogs(); })(); setInterval(() => { if (currentPage === 'home' && !currentProject) refreshOverview() }, 10000);

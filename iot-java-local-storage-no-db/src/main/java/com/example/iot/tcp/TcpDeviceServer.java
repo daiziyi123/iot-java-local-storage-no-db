@@ -37,6 +37,7 @@ public class TcpDeviceServer {
     private final DeviceConnectionManager connectionManager;
     private final DeviceService deviceService;
     private final ObjectMapper objectMapper;
+    private final CommunicationLogManager commLogManager; // [增强] TCP 通信日志
     private final ExecutorService pool = Executors.newCachedThreadPool();
 
     private volatile boolean running = true;
@@ -45,11 +46,13 @@ public class TcpDeviceServer {
     public TcpDeviceServer(SensorService sensorService,
                            DeviceConnectionManager connectionManager,
                            DeviceService deviceService,
-                           ObjectMapper objectMapper) {
+                           ObjectMapper objectMapper,
+                           CommunicationLogManager commLogManager) {
         this.sensorService = sensorService;
         this.connectionManager = connectionManager;
         this.deviceService = deviceService;
         this.objectMapper = objectMapper;
+        this.commLogManager = commLogManager;
     }
 
     @PostConstruct
@@ -223,6 +226,12 @@ public class TcpDeviceServer {
             connectionManager.touch(projectId);
 
             log.info("[Project {}] Sensor saved locally, id={}: {}", projectId, recordId, sensorData);
+
+            // [增强] 记录收到的通信日志
+            String remoteAddr = String.valueOf(socket.getRemoteSocketAddress());
+            commLogManager.addLog(CommunicationLogManager.Direction.RECEIVED,
+                    projectId, remoteAddr, bodyStr);
+
             sendHttp(socket, 200, "OK", projectId);
         } catch (Exception e) {
             log.warn("Invalid device request: {}", e.getMessage());
@@ -269,6 +278,20 @@ public class TcpDeviceServer {
         out.write(response.getBytes(StandardCharsets.UTF_8));
         out.write(bodyBytes);
         out.flush();
+
+        // [增强] 记录发送的通信日志
+        int pid = projectId;
+        String remoteAddr = String.valueOf(socket.getRemoteSocketAddress());
+        if (pid < 0) {
+            // 没有 projectId 时尝试从 currentProjectId 反查（用 remoteAddr）
+            for (Map.Entry<Integer, String> e : currentSocketAddress.entrySet()) {
+                if (e.getValue().equals(remoteAddr)) { pid = e.getKey(); break; }
+            }
+        }
+        final int finalPid = pid;
+        String respLog = "→ " + body; // 只记录 JSON body，HTTP 头冗余
+        commLogManager.addLog(CommunicationLogManager.Direction.SENT,
+                finalPid, remoteAddr, respLog);
     }
 
     private int indexOf(byte[] source, byte[] target, int fromIndex) {

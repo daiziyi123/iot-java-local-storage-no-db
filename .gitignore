@@ -18,11 +18,3 @@ data/
 # OS
 .DS_Store
 Thumbs.db
-
-# GCC build artifacts
-embedded/build_gcc/
-embedded/Project/gd32f470.ld
-
-# Keil build artifacts
-embedded/Project/Objects/
-embedded/Project/Listings/
