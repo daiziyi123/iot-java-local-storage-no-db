@@ -11,7 +11,7 @@
 #define C3_WIFI_SSID     "yuwei70"
 #define C3_WIFI_PASS     "yuwei123"
 #define C3_TCP_SERVER_IP "192.168.43.10"
-#define C3_TCP_SERVER_PORT 1025
+#define C3_TCP_SERVER_PORT 8081  // [修复] 原 1025，后端 HTTP 已占 8080，TCP 设备端口改为 8081
 
 // 状态枚举
 typedef enum {

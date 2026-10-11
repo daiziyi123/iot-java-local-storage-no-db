@@ -1,4 +1,4 @@
-#define configCPU_CLOCK_HZ        ( 200000000UL ) // GD32F470 200MHz PLL from 25MHz HXTAL
+#define configCPU_CLOCK_HZ        ( 200000000UL ) // [修复] 原 240MHz，实际 system_clock_200m_25m_hxtal 输出 200MHz。不匹配会导致 FreeRTOS tick 偏差 1.2 倍，AT 命令超时
 #define configTICK_RATE_HZ        ( 1000 )        // 1ms系统滴答
 #define configMAX_PRIORITIES      ( 8 )
 #define configMINIMAL_STACK_SIZE  ( 128 )

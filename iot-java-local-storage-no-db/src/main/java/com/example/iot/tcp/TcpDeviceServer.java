@@ -30,7 +30,7 @@ public class TcpDeviceServer {
     private static final Logger log = LoggerFactory.getLogger(TcpDeviceServer.class);
     private static final byte[] HEADER_END = "\r\n\r\n".getBytes(StandardCharsets.US_ASCII);
 
-    @Value("${iot.tcp.port:1025}")
+    @Value("${iot.tcp.port:8081}") // [修复] 原 1025，HTTP 已占 8080，TCP 设备端口改为 8081（与板子 c3.h 同步）
     private int port;
 
     private final SensorService sensorService;

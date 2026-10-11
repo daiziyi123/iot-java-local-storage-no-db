@@ -17,7 +17,7 @@ logging:
 
 iot:
   tcp:
-    port: ${IOT_TCP_PORT:1025}
+    port: ${IOT_TCP_PORT:8081}  # [修复] 原 1025，HTTP 已占 8080，TCP 设备监听 8081
   storage:
     dir: ${IOT_STORAGE_DIR:./data}
     max-sensor-records: ${IOT_MAX_SENSOR_RECORDS:5000}

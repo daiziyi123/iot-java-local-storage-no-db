@@ -860,6 +860,11 @@ static void system_clock_200m_25m_hxtal(void)
     RCU_APB1EN |= RCU_APB1EN_PMUEN;
     PMU_CTL |= PMU_CTL_LDOVS;
 
+    /* [修复] 配置 Flash 等待周期为 5，用于 SYSCLK 最高 200MHz。
+     * 不加此行，CPU 在 >120MHz 下从 Flash 取指令会产生总线故障(BusFault/PRECISERR)。
+     * 参考 RM0090：FMC_WS=5 适用于 180~216MHz，WS=4 适用于 150~180MHz，WS=3 适用于 120~150MHz。 */
+    FMC_WS = (FMC_WS & ~FMC_WC_WSCNT) | WS_WSCNT_5;
+
     /* HXTAL is stable */
     /* AHB = SYSCLK */
     RCU_CFG0 |= RCU_AHB_CKSYS_DIV1;

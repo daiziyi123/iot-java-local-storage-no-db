@@ -313,6 +313,12 @@ void Usart1_Receive_Callback(void)
 	}
 }
 
-
+/* [修复] USART1_IRQHandler — BSP_Init() 开启了 USART1 中断(NVIC + USART_INT_RBNE)，
+ * 但原代码只有 Usart1_Receive_Callback()，缺少 IRQ 处理函数包装。
+ * 没有此函数，任何 USART1 接收字节都会触发 Default_Handler → 死循环 → 板子 HardFault 锁死。 */
+void USART1_IRQHandler(void)
+{
+    Usart1_Receive_Callback();
+}
 
 

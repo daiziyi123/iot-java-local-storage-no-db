@@ -23,7 +23,7 @@ public class SystemController {
     public SystemController(LocalStorageSupport storage,
                             SensorService sensorService,
                             DeviceConnectionManager connectionManager,
-                            @Value("${iot.tcp.port:1025}") int tcpPort) {
+                            @Value("${iot.tcp.port:8081}") int tcpPort) { // [修复] 原 1025 → 8081，与板子 c3.h 同步
         this.storage = storage;
         this.sensorService = sensorService;
         this.connectionManager = connectionManager;
