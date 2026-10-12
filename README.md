@@ -1,20 +1,14 @@
 # IoT Java 本地存储版（无需 MySQL / RDS 权限）
 
-## 为什么改成这个版本
+## 项目简介
 
-原工程依赖阿里云 RDS MySQL。只要数据库账号没有库权限、没有表权限、没有白名单权限，项目就会出现 `Access denied`、数据查询为空或启动失败。
+本项目是一个**物联网（IoT）端到端系统**，由**嵌入式硬件端**和**Java 后端服务**两部分组成，实现"传感器数据采集 → TCP 上报 → 本地持久化存储 → Web 可视化展示 → 远程下发控制命令"的完整闭环。
 
-当前版本已经**完全取消外部数据库依赖**：
+- **嵌入式端**：基于 **GD32F470ZK（Cortex-M4）+ FreeRTOS** 实时操作系统，通过 I2C/UART/GPIO 采集温湿度、光照、人体红外等传感器数据，经 ESP32-C3 WiFi 模块以 TCP 协议上报给后端，并接收后端下发的控制命令（切换模式、调节风扇/灯光/窗帘等）。内置 7 个场景项目（智能教室、无人机、农场、宠物、垃圾桶、窗户等），通过宏切换。
+- **后端服务**：基于 **Spring Boot** 框架，使用**本地 JSON 文件持久化**（无需 MySQL/RDS 数据库），提供 REST API 和 TCP 设备服务（端口 1025），内置静态前端页面实现数据可视化与设备控制。
+- **通信协议**：开发板与后端通过 TCP Socket 通信，数据以 JSON 格式交互。
 
-- 不连接阿里云 RDS；
-- 不需要 MySQL 用户名、密码；
-- 不需要 RDS 白名单；
-- 不执行 `CREATE DATABASE` / `CREATE TABLE`；
-- 浏览器用户也不需要任何数据库权限。
-
-架构变为：
-
-`GD32/设备 -> TCP 1025 -> Spring Boot -> 本地 data/ 文件 -> REST API -> Web 前端`
+适用于物联网教学、原型验证及对数据库无依赖的轻量级部署场景。
 
 ## 目录结构
 
@@ -25,7 +19,7 @@ iot-java-local-storage-no-db/        # 本仓库
 │   │   ├── controller/       # REST API 控制层
 │   │   ├── service/          # 业务逻辑
 │   │   ├── storage/          # 本地文件持久化
-│   │   ├── tcp/              # TCP 设备服务器（端口 1025）
+│   │   ├── tcp/              # TCP 设备服务器
 │   │   └── model/            # 数据模型
 │   ├── src/main/resources/
 │   │   ├── static/           # 前端 HTML/CSS/JS（改完刷新即生效，无需重启）
@@ -89,7 +83,7 @@ mvn spring-boot:run
 
 - Web：http://127.0.0.1:8080
 - 系统健康检查：http://127.0.0.1:8080/api/system/health
-- 设备 TCP：运行 Java 的电脑 IP:1025
+- 设备 TCP：运行 Java 的电脑 IP:8081
 
 ## 健康检查
 
@@ -108,7 +102,7 @@ GET /api/system/health
   "database": "disabled",
   "storage": "local-file",
   "storageWritable": true,
-  "tcpPort": 1025
+  "tcpPort": 8081
 }
 ```
 
@@ -116,7 +110,7 @@ GET /api/system/health
 
 ## 设备上报格式
 
-嵌入式设备向 TCP 1025 发送裸 JSON（每 5 秒一次）：
+嵌入式设备向 TCP 8081 发送裸 JSON（每 5 秒一次）：  
 
 ```json
 {"project": 20, "name": "智能教室", "temperature": 26.5, "humidity": 61, "light": 320}
@@ -191,16 +185,4 @@ Java 后端向设备下发单字符 ASCII 命令，有两种方式：
 
 生产环境请使用 Java 后端（本仓库主目录），两者协议完全一致。
 
-## 已补功能
 
-- 完全移除 RDS/MySQL 权限依赖；
-- 本地持久化，重启不丢数据；
-- Project ID 0 可正常新增/修改；
-- 传感器历史记录返回真实记录 ID；
-- 项目新增/删除后首页动态同步；
-- 温度/湿度多项目趋势图真正绘制；
-- 告警"一键全部处理"不再写死项目 ID；
-- TCP 收包数量和字节数统计；
-- 命令统计避免重复计数；
-- 程序重启后旧 TCP 会话自动标记离线；
-- 首页显示"本地存储"真实状态，而不是伪造 MySQL 正常状态。
